@@ -6,7 +6,7 @@
         {
           "src": "https://drive.google.com/uc?export=view&id=1n2iFo9jsHVGsK1fUsYXXib14fMpbUgCo",
           "title": "interview_draft",
-          "audioUrl": "audio/inside_the_salmon_skin.mp3"
+          "audioUrl": "https://drive.google.com/open?id=1Q6kh8y8F3qhyHNXR31nKba_WuNAT5u4B&usp=drive_fs"
         },
         {
           "src": "https://drive.google.com/uc?export=view&id=1o47KhY1btlQ9qLddLyQfkm1uviVx0H1A",
@@ -538,6 +538,13 @@
     {
       "events": [
         {
+          "isPast": false,
+          "timestamp": 1792969200000,
+          "text": "26.10.2026<br>Review Issue 01 <br> We’re excited to announce \"traces\"\n\nJoin us for end of semester aperitivo to get to know who we are, what we’re building and the ideas behind Apollo.\n\n03/07/2026, this Thursday, 19:00 onwards\nPiazza Leonardo da Vinci (in front of Edificio 1)\nWe’d love to see you there!!",
+          "imgId": null,
+          "spreadData": null
+        },
+        {
           "isPast": true,
           "timestamp": 1783029600000,
           "text": "03.07.2026<br>aperetivo <br> We’re excited to INVITE YOU: Meet Apollo!!\n\nJoin us for end of semester aperitivo to get to know who we are, what we’re building and the ideas behind Apollo.\n\n03/07/2026, this Thursday, 19:00 onwards\nPiazza Leonardo da Vinci (in front of Edificio 1)\nWe’d love to see you there!!",
@@ -585,10 +592,10 @@
         {
           "isPast": true,
           "timestamp": 1781042400000,
-          "text": "10.06.2026<br>you have been spotted <br> it is exam phase and we see all these amazing projects and models beeing put together, the last sketches, the first test prints and we want to show all of them! Whenever we like a project we left a little message and so far the feedback was amazing\n\n",
+          "text": "10.06.2026<br>spotted <br> it is exam phase and we see all these amazing projects and models beeing put together, the last sketches, the first test prints and we want to show all of them! Whenever we like a project we left a little message and so far the feedback was amazing\n\n",
           "imgId": "1VUod3vLLhwf48RjD4okEbemIisGjedFb",
           "spreadData": {
-            "id": "calevt_6",
+            "id": "calevt_5",
             "metadata": {
               "name": "10.06.2026",
               "dateOverride": "you have been spotted",
@@ -630,10 +637,10 @@
         {
           "isPast": true,
           "timestamp": 1779400800000,
-          "text": "22.05.2026<br>New Posters out<br> its examn season and we want to see your amazing projects and gain attention for your work",
+          "text": "22.05.2026<br>new Posters out<br> its examn season and we want to see your amazing projects and gain attention for your work",
           "imgId": "1AdIG1eIUXweE9WOkBqQrmgb0tK1YrotC",
           "spreadData": {
-            "id": "calevt_5",
+            "id": "calevt_4",
             "metadata": {
               "name": "22.05.2026",
               "dateOverride": "Exam Season Poster",
@@ -662,15 +669,8 @@
         },
         {
           "isPast": true,
-          "timestamp": 1779141600000,
-          "text": "19.05.2026<br>examn season <br> everyday we saw your amazing work beeing put together, all the future models beeing build and we want everyone to see these incredible projects",
-          "imgId": "1BofgQEVPOC1dg-3UYeWaRIpkh_wZNUhl",
-          "spreadData": null
-        },
-        {
-          "isPast": true,
           "timestamp": 1776636000000,
-          "text": "20.04.2026<br>Tabelling <br> we want to gain attention for our mission and meet as much architecture students of polimi as possible! ",
+          "text": "20.04.2026<br>tabelling <br> we want to gain attention for our mission and meet as much architecture students of polimi as possible! ",
           "imgId": "1Cj9cM5CQCd2upnJAKYfAaVelZLLjVVwf",
           "spreadData": {
             "id": "calevt_2",
@@ -767,7 +767,16 @@
       "title": "Issue_01",
       "images": [
         "https://drive.google.com/uc?export=view&id=1aiOjxP3vWz6naTVM3XV_77JPMDPeRdB5",
-        "https://drive.google.com/uc?export=view&id=1hjIDEEEYaBVF5Q2lFd7HlPpgijF9Qj5V"
+        "https://drive.google.com/uc?export=view&id=1qgrF42BBcqxb39av_k8QtbC-cOkUPu3B",
+        "https://drive.google.com/uc?export=view&id=1eQYcd18OfbjcwCH8EXpUuFONIYbssm9Z",
+        "https://drive.google.com/uc?export=view&id=14ZodmwxEBNUIp0CQvn-IEDY7lWicpxFh",
+        "https://drive.google.com/uc?export=view&id=1sxbPbHHBfYMWUpum1SgauWgDp28BPvW2",
+        "https://drive.google.com/uc?export=view&id=1xBMurC17rUu7tt8_z1n_QmCf55KASB8L",
+        "https://drive.google.com/uc?export=view&id=1d586ifqBCGUHozlK0pqUvRoq_U8InHEi",
+        "https://drive.google.com/uc?export=view&id=1FagrCPtkNYbYQruMzAG0a3Ei_HRQWx9s",
+        "https://drive.google.com/uc?export=view&id=1o8cNHyn8DwujsqI6mFH5B3PrfOoN7lB4",
+        "https://drive.google.com/uc?export=view&id=1XCrZJcJSe_rQX4j1TVeM5K4dYFweLt4z",
+        "https://drive.google.com/uc?export=view&id=1NmspcrA-ZeulAyYvF51727-ymcgqueQ3"
       ],
       "chapters": [
         {
@@ -780,14 +789,23 @@
         },
         {
           "name": "02_projects",
-          "page": 1
+          "page": 4
         },
         {
           "name": "04_interviews",
-          "page": 1
+          "page": 7
         }
       ],
       "pages": [
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
         {},
         {}
       ]
@@ -827,8 +845,8 @@
     {
       "category": "Projects",
       "title": "Inside the salmon skin",
-      "file": "audio/inside_the_salmon_skin.mp3",
-      "url": "audio/inside_the_salmon_skin.mp3",
+      "file": "audio/conversation_inside_the_salmon_skin.mp3",
+      "url": "audio/conversation_inside_the_salmon_skin.mp3",
       "year": "2026",
       "type": "Audio",
       "format": "MP3",
