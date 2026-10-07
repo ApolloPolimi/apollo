@@ -192,7 +192,7 @@ body.grid-mode .bookmark-note { width: 6vw; min-width: 10rem; font-size: 0.8rem;
 }
 
 .cal-row { display: flex; width: 100%; gap: 1rem; justify-content: flex-start; }
-.cal-date { flex: 0 0 35%; text-align: left; font-size: 1.4em; font-weight: normal; padding-left: 3ch; box-sizing: border-box; }
+.cal-date { flex: 0 0 35%; text-align: left; font-size: 1.2em; font-weight: normal; padding-left: 3ch; padding-top: 0.2rem; box-sizing: border-box; }
 #today-event .cal-date { font-weight: bold; padding-left: 0; }
 .cal-details { flex: 0 0 60%; text-align: left; word-break: break-word; overflow-wrap: break-word; box-sizing: border-box; }
 .cal-details::first-line { font-size: 1.4em; font-weight: bold; }
