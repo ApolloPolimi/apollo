@@ -280,7 +280,11 @@ window.closeLightbox = function(event) {
         });
         
         thumbs.forEach(thumb => {
-            const canvasImg = canvasImgs.find(c => c.src === thumb.src);
+            let canvasImg = canvasImgs.find(c => c.src === thumb.src);
+            if (!canvasImg && window.currentLightboxGallery) {
+                const leadInterview = window.currentLightboxGallery.find(g => g.isInterviewLead);
+                if (leadInterview) canvasImg = canvasImgs.find(c => c.src === leadInterview.src);
+            }
             if (!canvasImg) return;
             
             const startRect = thumb.getBoundingClientRect();
@@ -569,6 +573,14 @@ function unfoldProject(id) {
         { type: 'postit', p: p },
         { type: 'image', src: p.titleImage, name: "cover drawing", desc: 'cover drawing', audioUrl: p.titleAudio }
     ];
+
+    // Naturally sort project images by title/filename
+    const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+    const isInterview = name => /interview|intervista/i.test(name);
+
+    const interviewImages = [];
+    const otherImages = [];
+
     (p.images || []).forEach((img, i) => {
         let name = "drawing " + (i+1);
         if(img && img.title) name = img.title;
@@ -579,11 +591,43 @@ function unfoldProject(id) {
             name = parts[parts.length-1].split('.')[0].replace(/[-_]/g, ' ');
         }
         
-        // Ensure we extract the URL string if img is an object
         let imgUrl = typeof img === 'string' ? img : (img.src || '');
         let audioUrl = typeof img === 'string' ? null : (img.audioUrl || null);
-        allItems.push({ type: 'image', src: imgUrl, name: name, desc: name, audioUrl: audioUrl });
+        const item = { type: 'image', src: imgUrl, name: name, desc: name, audioUrl: audioUrl };
+
+        if (isInterview(name)) interviewImages.push(item);
+        else otherImages.push(item);
     });
+
+    interviewImages.sort((a, b) => collator.compare(a.name, b.name));
+    otherImages.sort((a, b) => collator.compare(a.name, b.name));
+
+    if (interviewImages.length > 0) {
+        // Search for pages named "interview_title", "title_interview", "interview_01", "interview_1", "interview_draft01"
+        let leadIdx = interviewImages.findIndex(img => 
+            /interview[_-]?title|title[_-]?interview/i.test(img.name)
+        );
+        if (leadIdx === -1) {
+            leadIdx = interviewImages.findIndex(img => 
+                /interview.*0?1\b|interview.*draft.*0?1\b/i.test(img.name)
+            );
+        }
+        if (leadIdx === -1) leadIdx = 0; // Default to first naturally-sorted page
+
+        if (leadIdx > 0) {
+            const lead = interviewImages.splice(leadIdx, 1)[0];
+            interviewImages.unshift(lead);
+        }
+
+        interviewImages[0].isInterviewLead = true;
+        interviewImages[0].interviewCount = interviewImages.length;
+        for (let k = 1; k < interviewImages.length; k++) {
+            interviewImages[k].isStackedInterviewChild = true;
+        }
+    }
+
+    interviewImages.forEach(item => allItems.push(item));
+    otherImages.forEach(item => allItems.push(item));
 
     // 1. Preload images
     Promise.all(allItems.map(item => {
@@ -609,8 +653,11 @@ function unfoldProject(id) {
         }
     })).then(() => {
         
+        // Only visible items participate in the desktop canvas spread (stacked interview children are hidden from canvas)
+        const canvasItems = allItems.filter(i => !i.isStackedInterviewChild);
+
         // 2. Statistical Analysis & Scaling Rules
-        const normalItems = allItems.filter(i => i.type !== 'postit');
+        const normalItems = canvasItems.filter(i => i.type !== 'postit');
         const areas = normalItems.map(i => i.width * i.height).sort((a,b) => a-b);
         const medianArea = areas[Math.floor(areas.length / 2)] || 100000;
         
@@ -629,11 +676,22 @@ function unfoldProject(id) {
             item.rotation = 0;
         });
 
+        // Match child interview pages dimensions to lead page
+        const leadInterview = allItems.find(i => i.isInterviewLead);
+        if (leadInterview) {
+            allItems.forEach(i => {
+                if (i.isStackedInterviewChild) {
+                    i.targetWidth = leadInterview.targetWidth;
+                    i.targetHeight = leadInterview.targetHeight;
+                }
+            });
+        }
+
         // Calculate median target height of images to scale the post-it correctly
         const targetHeights = normalItems.map(i => i.targetHeight).sort((a,b) => a-b);
         const medianTargetHeight = targetHeights[Math.floor(targetHeights.length / 2)] || 400;
 
-        const postitItem = allItems.find(i => i.type === 'postit');
+        const postitItem = canvasItems.find(i => i.type === 'postit');
         if (postitItem) {
             // Scale it to 75% of the median vertical edge, using its exact native height.
             postitItem.scaleFactor = Math.max(0.5, (medianTargetHeight / exactPostitHeight) * 0.75);
@@ -645,9 +703,9 @@ function unfoldProject(id) {
         }
 
         // 3. Initialize items in a rough grid
-        let cols = Math.ceil(Math.sqrt(allItems.length));
+        let cols = Math.ceil(Math.sqrt(canvasItems.length));
         let startX = 0, startY = 0, maxH = 0;
-        allItems.forEach((item, i) => {
+        canvasItems.forEach((item, i) => {
             if (i > 0 && i % cols === 0) { 
                 startX = 0; 
                 startY += maxH + 60; 
@@ -660,9 +718,9 @@ function unfoldProject(id) {
         });
         
         // Center initial cluster roughly at 0,0
-        let cx = allItems.reduce((sum, i) => sum + i.x, 0) / allItems.length;
-        let cy = allItems.reduce((sum, i) => sum + i.y, 0) / allItems.length;
-        allItems.forEach(item => { 
+        let cx = canvasItems.reduce((sum, i) => sum + i.x, 0) / canvasItems.length;
+        let cy = canvasItems.reduce((sum, i) => sum + i.y, 0) / canvasItems.length;
+        canvasItems.forEach(item => { 
             item.x -= cx; 
             item.y -= cy; 
             item.vx = 0; 
@@ -670,22 +728,20 @@ function unfoldProject(id) {
         });
 
         // Calculate dynamic gravity based on project size
-        // Normal gravity is 0.003. For projects over 10 items, gravity weakens linearly
-        // so massive projects don't crush their centers.
-        let gravity = 0.003 * Math.min(1, 10 / allItems.length);
+        let gravity = 0.003 * Math.min(1, 10 / canvasItems.length);
 
         // 4. Force-Directed Simulation (Relaxation Loop)
         for (let step = 0; step < 150; step++) {
             // Center attraction
-            allItems.forEach(item => {
+            canvasItems.forEach(item => {
                 item.vx -= item.x * gravity;
                 item.vy -= item.y * gravity;
             });
             
             // Repulsion
-            for (let i = 0; i < allItems.length; i++) {
-                for (let j = i + 1; j < allItems.length; j++) {
-                    let a = allItems[i], b = allItems[j];
+            for (let i = 0; i < canvasItems.length; i++) {
+                for (let j = i + 1; j < canvasItems.length; j++) {
+                    let a = canvasItems[i], b = canvasItems[j];
                     let dx = a.x - b.x;
                     let dy = a.y - b.y;
                     
@@ -710,7 +766,7 @@ function unfoldProject(id) {
                 }
             }
             // Integration & Friction
-            allItems.forEach(item => {
+            canvasItems.forEach(item => {
                 item.x += item.vx; 
                 item.y += item.vy;
                 item.vx *= 0.6; 
@@ -718,12 +774,11 @@ function unfoldProject(id) {
             });
             
             // Spring force: align Post-It's bottom edge to the Cover Image's bottom edge
-            if (allItems.length > 1 && allItems[0].type === 'postit' && allItems[1].type === 'image') {
-                let postit = allItems[0];
-                let cover = allItems[1];
+            if (canvasItems.length > 1 && canvasItems[0].type === 'postit' && canvasItems[1].type === 'image') {
+                let postit = canvasItems[0];
+                let cover = canvasItems[1];
                 let coverVisualBottom = cover.y + cover.targetHeight/2;
                 let targetY = coverVisualBottom - postit.targetHeight/2 - 12;
-                // Gently pull post-it towards the target Y, physics will push other things out of the way
                 postit.vy += (targetY - postit.y) * 0.15;
             }
         }
@@ -739,7 +794,7 @@ function unfoldProject(id) {
 
                 // 5. Calculate final bounding box and render
                 let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-                allItems.forEach(item => {
+                canvasItems.forEach(item => {
                     minX = Math.min(minX, item.x - item.targetWidth/2);
                     minY = Math.min(minY, item.y - item.targetHeight/2);
                     maxX = Math.max(maxX, item.x + item.targetWidth/2);
@@ -911,7 +966,7 @@ function unfoldProject(id) {
 
                     // Do NOT init physics engine
                 } else {
-                    allItems.forEach(item => {
+                    canvasItems.forEach(item => {
                         let left = (item.x - item.targetWidth/2) - minX;
                         let top = (item.y - item.targetHeight/2) - minY;
                         let style = `position: absolute; left: ${left}px; top: ${top}px; width: ${item.targetWidth}px; height: ${item.targetHeight}px; transform: rotate(${item.rotation}deg); display: flex; flex-direction: column; align-items: center;`;
@@ -939,15 +994,21 @@ function unfoldProject(id) {
                             </div>`;
                         } else {
                             const imgIndex = window.currentLightboxGallery.findIndex(g => g.src === item.src);
+                            const isStack = item.isInterviewLead && item.interviewCount > 1;
+                            const displayName = isStack ? `${item.name} (${item.interviewCount} pages)` : item.name;
                             html += `
                             <div style="${style}">
-                                <div class="unfold-grid-item" style="width:100%; height:auto;">
-                                    <img src="${getSafeImg(item.src)}" alt="${item.name}" onclick="openLightbox(${imgIndex}, event)" style="position: relative; z-index: 1; width: 100%; max-height:none; height:auto; object-fit: contain; display: block;">
+                                <div class="unfold-grid-item" style="width:100%; height:auto; position: relative;">
+                                    ${isStack ? `
+                                        <div style="position: absolute; inset: 0; transform: translate(6px, 6px) rotate(1.2deg); background: #eee; border: 1px solid #ddd; z-index: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.07); pointer-events: none;"></div>
+                                        <div style="position: absolute; inset: 0; transform: translate(3px, 3px) rotate(-0.6deg); background: #fbfbfb; border: 1px solid #e5e5e5; z-index: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.05); pointer-events: none;"></div>
+                                    ` : ''}
+                                    <img src="${getSafeImg(item.src)}" alt="${item.name}" onclick="openLightbox(${imgIndex}, event)" style="position: relative; z-index: 1; width: 100%; max-height:none; height:auto; object-fit: contain; display: block; ${isStack ? 'box-shadow: 0 2px 8px rgba(0,0,0,0.12);' : ''} cursor: pointer;">
                                 </div>
                                 <div style="width: 100%; position: relative; margin-top: 1rem;">
                                     ${item.audioUrl ? `<div style="position: absolute; left: 0; top: 0;"><span class="magazine-audio-btn mag-listen-btn" style="font-family: 'Ufficio', sans-serif; font-size: 0.6rem; cursor: pointer; text-decoration: none; color: black; opacity: 1; pointer-events: auto;" onclick="event.stopPropagation(); if(typeof toggleMagazineAudio === 'function') toggleMagazineAudio('${item.audioUrl}')">${typeof magAudioState !== 'undefined' ? magAudioState : 'listen'}</span></div>` : ''}
                                     <div style="width: 100%; text-align: center; font-size: 0.6rem; opacity: 1; font-weight: bold; text-transform: lowercase; font-family: 'Ufficio', sans-serif; color: black; text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(255,255,255,0.8); pointer-events: none; padding-top: 0.1rem;">
-                                        ${item.name}
+                                        ${displayName}
                                     </div>
                                 </div>
                             </div>`;
